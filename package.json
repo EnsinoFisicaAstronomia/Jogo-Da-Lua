@@ -1,5 +1,4 @@
 {
-  "homepage": "https://ensinofisicaastronomia.github.io/Jogo-Da-Lua/",
   "name": "jogo-da-lua",
   "private": true,
   "version": "1.0.0",
@@ -10,20 +9,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "start": "react-scripts start"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "lucide-react": "^0.383.0",
-    "firebase": "^12.17.0"
+    "lucide-react": "^0.383.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.7.0",
-    "vite": "^7.0.0",
+    "vite": "^8.2.0",
     "tailwindcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3"
   }
