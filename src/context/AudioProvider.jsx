@@ -79,7 +79,7 @@ export function AudioProvider({ children }) {
         sfxVolume: muted ? 0 : 0.6,
       }}
     >
-      <audio ref={audioRef} src="/music/trilha.mp3" loop preload="auto" />
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}music/trilha.mp3`} loop preload="auto" />
       {children}
     </AudioSettingsContext.Provider>
   );

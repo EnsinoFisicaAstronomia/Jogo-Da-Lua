@@ -22,15 +22,15 @@
  */
 
 const SOUND_FILES = {
-  click: "/sounds/click.mp3",
-  select: "/sounds/select.mp3",
-  reveal: "/sounds/reveal.mp3",
-  correct: "/sounds/correct.mp3",
-  wrong: "/sounds/wrong.mp3",
-  spin: "/sounds/spin.mp3",
-  "spin-stop": "/sounds/spin-stop.mp3",
-  score: "/sounds/score.mp3",
-  toggle: "/sounds/toggle.mp3",
+  click: `${import.meta.env.BASE_URL}sounds/click.mp3`,
+  select: `${import.meta.env.BASE_URL}sounds/select.mp3`,
+  reveal: `${import.meta.env.BASE_URL}sounds/reveal.mp3`,
+  correct: `${import.meta.env.BASE_URL}sounds/correct.mp3`,
+  wrong: `${import.meta.env.BASE_URL}sounds/wrong.mp3`,
+  spin: `${import.meta.env.BASE_URL}sounds/spin.mp3`,
+  "spin-stop": `${import.meta.env.BASE_URL}sounds/spin-stop.mp3`,
+  score: `${import.meta.env.BASE_URL}sounds/score.mp3`,
+  toggle: `${import.meta.env.BASE_URL}sounds/toggle.mp3`,
 };
 
 /** Cada som sintetizado é uma pequena sequência de tons (osciladores). */
