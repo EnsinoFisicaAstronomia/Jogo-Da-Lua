@@ -2,7 +2,7 @@
 
 Uma roleta interativa com 7 setores temáticos sobre a Lua, perguntas de Verdadeiro ou Falso, placar de grupos e um desafio bônus com diagramas ilustrados — desenvolvida em React para uso em sala de aula.
 
-**🔗 Acesse o jogo online:** [Jogo da Lua](https://jogo-da-lua.web.app)
+**🔗 Acesse o jogo online:** [Jogo da Lua](https://danielmasson.github.io/Jogo-Da-Lua/)
 
 ---
 
@@ -18,18 +18,21 @@ Uma roleta interativa com 7 setores temáticos sobre a Lua, perguntas de Verdade
   - [5. Tailwind CSS](#5-tailwind-css)
   - [6. lucide-react (ícones)](#6-lucide-react-ícones)
   - [7. Web Audio API](#7-web-audio-api)
-  - [8. Firebase (Realtime Database e Hosting)](#8-firebase-realtime-database-e-hosting)
+  - [8. GitHub Pages e GitHub Actions](#8-github-pages-e-github-actions)
   - [9. Google Fonts](#9-google-fonts)
 - [Roteiro de replicação do ambiente](#roteiro-de-replicação-do-ambiente)
 - [Como obter o projeto (clonar o repositório)](#como-obter-o-projeto-clonar-o-repositório)
 - [Rodando localmente](#rodando-localmente)
+- [Publicação (deploy)](#publicação-deploy)
 - [Estrutura do projeto](#estrutura-do-projeto)
 
 ---
 
 ## Sobre o projeto
 
-Versão em React do jogo original em Python/Tkinter: uma roleta com 7 setores temáticos sobre a Lua, perguntas de Verdadeiro/Falso, placar de 6 grupos e um desafio bônus com diagramas ilustrados. O projeto também oferece um modo online com salas multiplayer via Firebase Realtime Database e uma versão adaptada para dispositivos móveis.
+Versão em React do jogo original em Python/Tkinter: uma roleta com 7 setores temáticos sobre a Lua, perguntas de Verdadeiro/Falso, placar de 6 grupos e um desafio bônus com diagramas ilustrados. O projeto também oferece uma versão adaptada para dispositivos móveis, em que a roleta sorteia uma pergunta do setor automaticamente.
+
+O jogo é 100% estático (roda inteiro no navegador, sem servidor nem banco de dados) e é publicado no GitHub Pages.
 
 ## Créditos
 
@@ -51,19 +54,18 @@ Esta seção documenta as tecnologias empregadas na construção do projeto, o p
 | Ferramenta de build/dev server | Vite | Compilação, hot-reload e empacotamento do projeto |
 | Estilização | CSS3 (variáveis customizadas) + Tailwind CSS | Aparência visual e sistema de temas |
 | Ícones | lucide-react | Ícones vetoriais usados nos botões e controles |
-| Áudio | Web Audio API (nativa do navegador) | Efeitos sonoros sintetizados e trilha de fundo |
-| Backend/Tempo real | Firebase Realtime Database | Suporte a salas multiplayer online |
-| Hospedagem | Firebase Hosting | Publicação do build estático |
+| Áudio | Web Audio API (nativa do navegador) + `<audio>` | Efeitos sonoros sintetizados e trilha de fundo |
+| Hospedagem e CI/CD | GitHub Pages + GitHub Actions | Build automático e publicação do site estático |
 | Fontes | Google Fonts (Fraunces, Inter, IBM Plex Mono) | Tipografia do projeto |
 
 ### 1. Node.js e npm (pré-requisito de todo o projeto)
 
 **O que é:** Node.js é um ambiente de execução JavaScript fora do navegador. O npm (Node Package Manager) é o gerenciador de pacotes que acompanha o Node, usado para instalar bibliotecas e rodar scripts do projeto.
 
-**Por que é necessário:** Todas as demais ferramentas (React, Vite, Firebase CLI etc.) dependem do Node/npm para serem instaladas e executadas localmente.
+**Por que é necessário:** Todas as demais ferramentas (React, Vite etc.) dependem do Node/npm para serem instaladas e executadas localmente.
 
 **Instalação:**
-1. Acesse [nodejs.org](https://nodejs.org) e baixe a versão **LTS** (recomendada para estabilidade).
+1. Acesse [nodejs.org](https://nodejs.org) e baixe a versão **LTS** (o projeto exige Node `^20.19.0` ou `>=22.12.0`).
 2. Instale seguindo o instalador padrão do seu sistema operacional (Windows, macOS ou Linux).
 3. Verifique a instalação no terminal:
    ```bash
@@ -116,18 +118,21 @@ npm install
 }
 ```
 - `npm run dev` → inicia o servidor local de desenvolvimento.
-- `npm run build` → gera os arquivos finais (HTML/CSS/JS), prontos para hospedagem.
+- `npm run build` → gera os arquivos finais (HTML/CSS/JS) na pasta `dist/`, prontos para hospedagem.
 - `npm run preview` → serve localmente o resultado do build, simulando produção.
 
 **Arquivo de configuração (`vite.config.js`):**
 ```js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [react()],
+  base: "/Jogo-Da-Lua/", // deve ser igual ao nome do repositório no GitHub
+  plugins: [react(), tailwindcss()],
 });
 ```
+> A opção `base` é obrigatória para o GitHub Pages: o site é servido em `https://<usuario>.github.io/<repositorio>/`, e não na raiz do domínio. Os caminhos dos arquivos de áudio em `public/` já usam `import.meta.env.BASE_URL` para respeitar esse prefixo.
 
 ### 4. CSS com variáveis customizadas
 
@@ -150,19 +155,11 @@ export default defineConfig({
 
 **O que é:** Framework CSS utilitário que fornece classes prontas (como `flex`, `p-4`, `text-center`) para estilização rápida, sem escrever CSS customizado do zero.
 
-**Papel no projeto:** É referenciado no arquivo `App.css` por meio da diretiva `@import "tailwindcss";`, como camada de utilitários complementar ao CSS customizado.
+**Papel no projeto:** O plugin do Tailwind está configurado no `vite.config.js` e o arquivo `src/App.css` contém a diretiva `@import "tailwindcss";`. Atualmente a identidade visual do jogo vem quase toda do CSS customizado (`jogo-da-lua.css`); o Tailwind fica disponível como camada de utilitários complementar. Para ativá-lo de fato, importe o `App.css` no `main.jsx` (`import "./App.css";`).
 
 **Instalação (Tailwind v4, compatível com a sintaxe `@import "tailwindcss"`):**
 ```bash
 npm install tailwindcss @tailwindcss/vite
-```
-E no `vite.config.js`, adicionar o plugin:
-```js
-import tailwindcss from "@tailwindcss/vite";
-
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-});
 ```
 > Apenas importar `tailwindcss` no CSS não é suficiente — o pacote e o plugin do Vite precisam estar de fato instalados, ou o build falha ao processar essa diretiva.
 
@@ -187,79 +184,23 @@ import { Volume2, VolumeX } from "lucide-react";
 
 **O que é:** API nativa dos navegadores modernos para geração e processamento de áudio em tempo real, sem depender de arquivos de som externos.
 
-**Papel no projeto:** Usada para sintetizar efeitos sonoros (cliques, acertos, erros, giro da roleta) diretamente via osciladores (`AudioContext`, `OscillatorNode`, `GainNode`), com fallback automático para arquivos `.mp3` quando disponíveis em `public/sounds/`.
+**Papel no projeto:** Usada para sintetizar efeitos sonoros (cliques, acertos, erros, giro da roleta) diretamente via osciladores (`AudioContext`, `OscillatorNode`, `GainNode`), com uso automático de arquivos `.mp3` quando existirem em `public/sounds/`. A música de fundo é um arquivo `public/music/trilha.mp3` tocado por um elemento `<audio>`, com controle de volume/mudo salvo no `localStorage`.
 
 **Instalação:** Não requer instalação — é nativa do navegador. Basta acessá-la via `window.AudioContext` (com fallback `window.webkitAudioContext` para compatibilidade com navegadores mais antigos).
 
-### 8. Firebase (Realtime Database e Hosting)
+### 8. GitHub Pages e GitHub Actions
 
-**O que é:** Plataforma de desenvolvimento de aplicativos do Google que oferece serviços de backend prontos, sem necessidade de manter um servidor próprio. No projeto, dois serviços são relevantes:
-- **Realtime Database:** banco de dados NoSQL sincronizado em tempo real, usado para as salas de jogo multiplayer.
-- **Hosting:** serviço de hospedagem de arquivos estáticos, usado para publicar o resultado do `npm run build`.
+**O que é:**
+- **GitHub Pages:** serviço gratuito do GitHub para hospedar sites estáticos diretamente a partir de um repositório.
+- **GitHub Actions:** sistema de automação (CI/CD) do GitHub, usado aqui para compilar o projeto e publicá-lo a cada alteração.
 
-**Instalação e configuração passo a passo:**
+**Papel no projeto:** A cada `push` na branch `main`, o workflow `.github/workflows/deploy.yml` instala as dependências (`npm ci`), gera o build (`npm run build`) e publica a pasta `dist/` no GitHub Pages. Não há backend, banco de dados nem variáveis de ambiente/segredos para configurar.
 
-1. **Instale o SDK do Firebase no projeto:**
-   ```bash
-   npm install firebase
-   ```
-
-2. **Crie um projeto no console do Firebase:**
-   - Acesse [console.firebase.google.com](https://console.firebase.google.com).
-   - Clique em "Adicionar projeto" e siga o assistente.
-
-3. **Obtenha as credenciais do app web:**
-   - Vá em "Configurações do projeto → Geral → Seus apps → Adicionar app → Web".
-   - Copie o objeto de configuração gerado (`apiKey`, `authDomain`, `databaseURL`, `projectId` etc.).
-
-4. **Configure as credenciais no código**, por exemplo em `src/firebase.js`:
-   ```js
-   import { initializeApp } from "firebase/app";
-   import { getDatabase } from "firebase/database";
-
-   const firebaseConfig = {
-     apiKey: "SUA_API_KEY",
-     authDomain: "seu-projeto.firebaseapp.com",
-     databaseURL: "https://seu-projeto-default-rtdb.firebaseio.com",
-     projectId: "seu-projeto",
-     storageBucket: "seu-projeto.appspot.com",
-     messagingSenderId: "SEU_SENDER_ID",
-     appId: "SEU_APP_ID",
-   };
-
-   const app = initializeApp(firebaseConfig);
-   export const db = getDatabase(app);
-   ```
-   > Recomenda-se usar variáveis de ambiente (`.env`, prefixadas com `VITE_`) em vez de credenciais fixas no código-fonte.
-
-5. **Instale a Firebase CLI (para hospedagem):**
-   ```bash
-   npm install -g firebase-tools
-   firebase login
-   ```
-
-6. **Inicialize o Hosting no projeto:**
-   ```bash
-   firebase init hosting
-   ```
-   - Selecione o projeto criado no console.
-   - Defina a pasta pública como `dist` (saída padrão do Vite).
-   - Configure como *single-page app*, gerando um `firebase.json` semelhante a:
-   ```json
-   {
-     "hosting": {
-       "public": "dist",
-       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-       "rewrites": [{ "source": "**", "destination": "/index.html" }]
-     }
-   }
-   ```
-
-7. **Publique o projeto:**
-   ```bash
-   npm run build
-   firebase deploy
-   ```
+**Configuração (uma única vez, no repositório):**
+1. No GitHub, abra **Settings → Pages**.
+2. Em **Build and deployment → Source**, selecione **GitHub Actions**.
+3. Garanta que o valor de `base` no `vite.config.js` seja igual ao nome do repositório (com a mesma grafia de maiúsculas/minúsculas).
+4. Faça um `push` na `main` — o site ficará disponível em `https://<usuario>.github.io/<repositorio>/`.
 
 ### 9. Google Fonts
 
@@ -285,24 +226,19 @@ npm create vite@latest jogo-da-lua -- --template react
 cd jogo-da-lua
 
 # 3. Instalar dependências principais
-npm install react react-dom lucide-react firebase
+npm install react react-dom lucide-react
 npm install --save-dev vite @vitejs/plugin-react tailwindcss @tailwindcss/vite
 
-# 4. Configurar Firebase (console.firebase.google.com)
-#    - criar projeto, ativar Realtime Database
-#    - copiar credenciais para src/firebase.js (idealmente via variáveis de ambiente)
-
-# 5. Rodar em desenvolvimento
+# 4. Rodar em desenvolvimento
 npm run dev
 
-# 6. Gerar build de produção
+# 5. Gerar build de produção
 npm run build
 
-# 7. (Opcional) Publicar no Firebase Hosting
-npm install -g firebase-tools
-firebase login
-firebase init hosting
-firebase deploy
+# 6. (Opcional) Publicar no GitHub Pages
+#    - subir o código para um repositório no GitHub
+#    - Settings → Pages → Source: GitHub Actions
+#    - manter o workflow .github/workflows/deploy.yml e o "base" do vite.config.js
 ```
 
 ---
@@ -322,11 +258,11 @@ Esta etapa é diferente de "criar um projeto novo com Vite" (visto no roteiro ac
    ```bash
    git clone https://github.com/DanielMasson/Jogo-da-Lua.git
    ```
-   Isso cria uma pasta local (ex.: `jogo-da-lua/`) com todo o código do projeto — já é a pasta do projeto React, não é necessário criar uma nova com `npm create vite`.
+   Isso cria uma pasta local (`Jogo-da-Lua/`) com todo o código do projeto — já é a pasta do projeto React, não é necessário criar uma nova com `npm create vite`.
 
 3. **Entre na pasta do projeto:**
    ```bash
-   cd jogo-da-lua
+   cd Jogo-da-Lua
    ```
 
 4. **Instale as dependências declaradas no `package.json`:**
@@ -335,10 +271,7 @@ Esta etapa é diferente de "criar um projeto novo com Vite" (visto no roteiro ac
    ```
    Esse comando lê o `package.json`/`package-lock.json` do repositório e baixa automaticamente React, Vite, lucide-react e demais pacotes já configurados no projeto — não é preciso reinstalar cada tecnologia manualmente como no roteiro de "criar do zero".
 
-5. **(Se aplicável) configure o Firebase:**
-   - Copie/edite o arquivo de credenciais (`src/firebase.js` ou `.env`) com as chaves do seu próprio projeto Firebase, conforme a seção [Firebase](#8-firebase-realtime-database-e-hosting).
-
-6. **Siga para a seção [Rodando localmente](#rodando-localmente)** para iniciar o servidor de desenvolvimento.
+5. **Siga para a seção [Rodando localmente](#rodando-localmente)** para iniciar o servidor de desenvolvimento. Não é necessária nenhuma configuração de chaves ou credenciais.
 
 ---
 
@@ -349,13 +282,34 @@ npm install
 npm run dev
 ```
 
-Abra o endereço mostrado no terminal (normalmente `http://localhost:5173`).
+Abra o endereço mostrado no terminal. Por causa da opção `base` do Vite, o endereço local inclui o prefixo do repositório (normalmente `http://localhost:5173/Jogo-Da-Lua/`).
+
+Para testar o build de produção localmente:
+
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+## Publicação (deploy)
+
+A publicação é automática: todo `push` na branch `main` dispara o workflow **Deploy GitHub Pages** (`.github/workflows/deploy.yml`), que compila o projeto e atualiza o site. O andamento pode ser acompanhado na aba **Actions** do repositório.
 
 ---
 
 ## Estrutura do projeto
 
 ```
+.github/
+└── workflows/
+    └── deploy.yml          # build + deploy automático no GitHub Pages
+
+public/
+├── music/trilha.mp3        # música de fundo (opcional)
+└── sounds/                 # efeitos sonoros em .mp3 (opcionais)
+
 src/
 ├── data/                 # dados estáticos do jogo (nenhuma lógica aqui)
 │   ├── perguntas.js       # as 70 perguntas de V/F, por setor
@@ -379,9 +333,10 @@ src/
 │
 ├── components/
 │   ├── Header.jsx
+│   ├── Footer.jsx
 │   ├── BonusPanel.jsx      # autocontido: pergunta bônus + modal de resposta
 │   ├── BonusModal.jsx
-│   ├── Roleta.jsx          # a roleta em SVG (desktop)
+│   ├── Roleta.jsx          # roleta + botão Girar (desktop)
 │   ├── RoletaSvg.jsx       # desenho da roleta, compartilhado entre telas
 │   ├── QuizPanel.jsx       # grade de perguntas + pergunta/correção
 │   ├── Scoreboard.jsx      # placar dos 6 grupos
@@ -401,5 +356,6 @@ src/
 │
 ├── JogoDaLua.jsx           # junta os hooks com os componentes visuais
 ├── App.jsx
-└── main.jsx                 # entrada do Vite
+├── App.css                 # diretiva do Tailwind
+└── main.jsx                # entrada do Vite
 ```
